@@ -1,7 +1,8 @@
--- Smart University Management System (SUMS) - Add-on Modules (Library, Research, Hostel)
 USE SmartUniversityDB;
 
 -- 1. Library Module
+DROP TABLE IF EXISTS LibraryLoans;
+DROP TABLE IF EXISTS Books;
 CREATE TABLE Books (
     BookID INT AUTO_INCREMENT PRIMARY KEY,
     Title VARCHAR(200) NOT NULL,
@@ -25,6 +26,7 @@ CREATE TABLE LibraryLoans (
 ) ENGINE=InnoDB;
 
 -- 2. Research & Publications Module
+DROP TABLE IF EXISTS ResearchPapers;
 CREATE TABLE ResearchPapers (
     PaperID INT AUTO_INCREMENT PRIMARY KEY,
     Title VARCHAR(250) NOT NULL,
@@ -37,6 +39,8 @@ CREATE TABLE ResearchPapers (
 ) ENGINE=InnoDB;
 
 -- 3. Hostel Management Module
+DROP TABLE IF EXISTS RoomAllocations;
+DROP TABLE IF EXISTS Hostels;
 CREATE TABLE Hostels (
     HostelID INT AUTO_INCREMENT PRIMARY KEY,
     HostelName VARCHAR(100) NOT NULL,

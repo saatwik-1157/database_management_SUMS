@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>SUMS V6.1 - Executive Presentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Reveal.js Core -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/black.min.css" id="theme">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #38bdf8;
+            --secondary: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-glass: rgba(15, 23, 42, 0.75);
+            --border-glass: rgba(255, 255, 255, 0.15);
+        }
+        
+        .reveal {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+            color: #e2e8f0;
+        }
+        
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            text-transform: none;
+            background: linear-gradient(135deg, #ffffff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+        .reveal h2 { font-size: 2.8rem; }
+        
+        .reveal p, .reveal li { font-weight: 300; line-height: 1.6; font-size: 0.9em;}
+
+        .glass-panel {
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin: 1rem 0;
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            border-radius: 16px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .stat-card:hover { transform: translateY(-8px); }
+        .stat-card i { font-size: 2.5rem; margin-bottom: 1rem; }
+        .stat-card h4 { margin: 0; font-size: 2.5rem; color: #fff; -webkit-text-fill-color: #fff; line-height: 1;}
+        .stat-card p { margin: 0; font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-top: 0.5rem;}
+
+        .highlight-text { color: var(--secondary); font-weight: 600; }
+        
+        /* Mermaid styling override */
+        .mermaid { background: transparent !important; display: flex; justify-content: center; }
+        .mermaid svg { max-width: 100%; height: auto; max-height: 500px; font-family: 'Inter', sans-serif !important; }
+        
+        .chart-container { position: relative; width: 100%; height: 350px; display: flex; justify-content: center; align-items: center; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- SLIDE 1: Title -->
+            <section data-transition="zoom">
+                <div class="glass-panel" style="padding: 4rem 2rem;">
+                    <i class="fas fa-network-wired" style="font-size: 4rem; color: var(--primary); margin-bottom: 1.5rem;"></i>
+                    <h1 style="font-size: 4rem; margin-bottom: 0.5rem;">S.U.M.S.</h1>
+                    <h3 style="font-size: 1.8rem; background: linear-gradient(to right, var(--secondary), var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 2rem;">Smart University Management System</h3>
+                    <p style="color: #cbd5e1; font-size: 1.2rem; max-width: 800px; margin: 0 auto;">Enterprise Database & Application Architecture</p>
+                    <div style="margin-top: 3rem; border-top: 1px solid var(--border-glass); padding-top: 1rem;">
+                        <p style="font-size: 0.8rem; color: #64748b; text-transform: uppercase; letter-spacing: 2px;">Version 6.1 • Global Deployment Edition</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 2: Problem Statement -->
+            <section data-transition="slide">
+                <h2>The Monolithic Problem</h2>
+                <div class="grid-2">
+                    <div style="text-align: left;">
+                        <p>Modern global universities outgrow traditional, single-server SQL architectures. They suffer from:</p>
+                        <ul style="color: #cbd5e1;">
+                            <li class="fragment"><strong>Data Fragmentation:</strong> Campuses operate in silos.</li>
+                            <li class="fragment"><strong>Performance Bottlenecks:</strong> Syncing 50,000+ profiles crashes legacy apps.</li>
+                            <li class="fragment"><strong>Vendor Lock-in:</strong> Tied to a single backend language (e.g., legacy PHP).</li>
+                            <li class="fragment"><strong>Poor Visibility:</strong> Executives lack real-time financial and asset metrics.</li>
+                        </ul>
+                    </div>
+                    <div class="glass-panel fragment">
+                        <i class="fas fa-server" style="font-size: 3rem; color: var(--danger); margin-bottom: 1rem;"></i>
+                        <h4 style="-webkit-text-fill-color: var(--danger);">The Monolith Fails</h4>
+                        <p style="font-size: 0.85rem;">High latency, difficult to scale, and prone to "Commands out of sync" errors when subjected to massive load.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 3: The Scale -->
+            <section data-transition="slide">
+                <h2>Enterprise Operational Scale</h2>
+                <p>SUMS is built from the ground up to handle massive, decentralized data streams.</p>
+                <div class="grid-4" style="margin-top: 2rem; margin-bottom: 2rem;">
+                    <div class="stat-card">
+                        <i class="fas fa-user-graduate" style="color: var(--primary);"></i>
+                        <h4>50,020</h4>
+                        <p>Active Students</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-chalkboard-teacher" style="color: var(--secondary);"></i>
+                        <h4>10,510</h4>
+                        <p>Faculty & Staff</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-boxes" style="color: var(--warning);"></i>
+                        <h4>5,000+</h4>
+                        <p>Tracked Assets</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-building" style="color: var(--danger);"></i>
+                        <h4>5</h4>
+                        <p>Mega Campuses</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 4: Campus Distribution Visual -->
+            <section data-transition="fade">
+                <h2>Global Infrastructure</h2>
+                <div class="glass-panel">
+                    <p style="margin-bottom: 1rem; font-size: 0.9em; text-align: left;">Real-time student enrollment distribution across the regional network.</p>
+                    <div class="chart-container" style="height: 400px;">
+                        <canvas id="campusDistributionChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 5: Database Schema (Mermaid) -->
+            <section data-transition="fade">
+                <h2>Database Entity Schema</h2>
+                <p style="font-size: 0.85em;">Highly normalized relational integrity via MySQL 8.0</p>
+                <div class="glass-panel" style="padding: 1rem;">
+                    <div class="mermaid">
+                        erDiagram
+                            CAMPUSES ||--o{ DEPARTMENTS : contains
+                            DEPARTMENTS ||--o{ STUDENTS : enrolls
+                            DEPARTMENTS ||--o{ FACULTY : employs
+                            STUDENTS ||--o{ ENROLLMENTS : registers
+                            COURSES ||--o{ SECTIONS : offers
+                            SECTIONS ||--o{ ENROLLMENTS : generates
+                            STUDENTS ||--o{ PAYMENTS : clears
+                            CAMPUSES ||--o{ ASSETS : owns
+                            COMPANIES ||--o{ PLACEMENT_DRIVES : hosts
+                            PLACEMENT_DRIVES ||--o{ PLACEMENT_RESULTS : issues
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 6: Polyglot Backend Architecture -->
+            <section data-transition="slide">
+                <h2>Polyglot Backend Design</h2>
+                <div class="grid-2">
+                    <div style="text-align: left; font-size: 0.85em;">
+                        <p>SUMS proves architectural resilience by supporting hot-swappable micro-backends without breaking the frontend UI.</p>
+                        <ul>
+                            <li><i class="fab fa-python" style="color: var(--warning)"></i> <strong>FastAPI:</strong> Async throughput</li>
+                            <li><i class="fab fa-node-js" style="color: var(--secondary)"></i> <strong>Express.js:</strong> Event-driven I/O</li>
+                            <li><i class="fab fa-java" style="color: var(--danger)"></i> <strong>JDBC Server:</strong> Enterprise reliability</li>
+                            <li><i class="fab fa-php" style="color: #8b5cf6"></i> <strong>PDO Scripting:</strong> Dynamic deployment</li>
+                        </ul>
+                    </div>
+                    <div class="glass-panel" style="padding: 1rem;">
+                        <div class="mermaid">
+                            graph TD
+                            UI[SPA Client App] -->|REST / JSON| GW{Unified Port 8000}
+                            GW -.-> API1(Python)
+                            GW -.-> API2(Node.js)
+                            GW -.-> API3(Java)
+                            API1 ==> DB[(MySQL Data Lake)]
+                            API2 ==> DB
+                            API3 ==> DB
+                            style UI fill:#0f172a,stroke:#38bdf8
+                            style DB fill:#064e3b,stroke:#10b981
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 7: Workflows & Automation -->
+            <section data-transition="slide">
+                <h2>Intelligent Automation</h2>
+                <div class="glass-panel">
+                    <div class="grid-3" style="gap: 2rem;">
+                        <div style="text-align: left;">
+                            <i class="fas fa-cogs" style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                            <h4>Triggers</h4>
+                            <p style="font-size: 0.8em;">MySQL triggers automatically recalculate a student's CGPA instantly whenever a new `Enrollments` grade is finalized.</p>
+                        </div>
+                        <div style="text-align: left;">
+                            <i class="fas fa-project-diagram" style="font-size: 2rem; color: var(--secondary); margin-bottom: 1rem;"></i>
+                            <h4>Stored Procedures</h4>
+                            <p style="font-size: 0.8em;">The `GraduateStudent` procedure archives active records and securely migrates graduates to the `Alumni` network table.</p>
+                        </div>
+                        <div style="text-align: left;">
+                            <i class="fas fa-file-signature" style="font-size: 2rem; color: var(--warning); margin-bottom: 1rem;"></i>
+                            <h4>Workflow Engine</h4>
+                            <p style="font-size: 0.8em;">Automated queuing for bureaucratic requests (Transcripts, NOCs) with timestamped audit trails.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 8: Finance & Assets Visual -->
+            <section data-transition="fade">
+                <h2>Asset & Financial Health</h2>
+                <div class="grid-2">
+                    <div class="glass-panel">
+                        <h4 style="font-size: 1.1rem; margin-bottom: 1rem;"><i class="fas fa-microchip" style="color: var(--primary);"></i> Infrastructure Condition</h4>
+                        <div class="chart-container" style="height: 250px;">
+                            <canvas id="assetChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass-panel">
+                        <h4 style="font-size: 1.1rem; margin-bottom: 1rem;"><i class="fas fa-chart-line" style="color: var(--secondary);"></i> Revenue Analytics (Cr)</h4>
+                        <div class="chart-container" style="height: 250px;">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 9: Corporate Placements Visual -->
+            <section data-transition="fade">
+                <h2>Corporate Placement Matrix</h2>
+                <p style="font-size: 0.9em; margin-bottom: 1rem;">Competitive intelligence mapping top recruiters against offered packages (LPA).</p>
+                <div class="glass-panel" style="display: flex; justify-content: center; align-items: center;">
+                    <div class="chart-container" style="height: 400px; width: 80%;">
+                        <canvas id="placementChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 10: Conclusion -->
+            <section data-transition="zoom">
+                <i class="fas fa-shield-check" style="font-size: 5rem; color: var(--secondary); margin-bottom: 2rem;"></i>
+                <h2 style="-webkit-text-fill-color: #fff;">System Production Ready</h2>
+                <div class="glass-panel" style="max-width: 600px; margin: 0 auto;">
+                    <ul style="list-style-type: none; padding: 0; text-align: center;">
+                        <li style="margin-bottom: 1rem;"><i class="fas fa-check-circle" style="color: var(--secondary);"></i> <strong>50K Data Inject:</strong> Successful via MySQL CLI</li>
+                        <li style="margin-bottom: 1rem;"><i class="fas fa-check-circle" style="color: var(--secondary);"></i> <strong>CORS Policies:</strong> Unified for Localhost & API</li>
+                        <li style="margin-bottom: 1rem;"><i class="fas fa-check-circle" style="color: var(--secondary);"></i> <strong>Async UI:</strong> Promise.all prevents blocking</li>
+                    </ul>
+                </div>
+                <br>
+                <a href="index.html" target="_blank" style="display: inline-block; padding: 1rem 2rem; background: var(--primary); color: #020617; text-decoration: none; font-weight: bold; border-radius: 8px; transition: transform 0.2s;">
+                    <i class="fas fa-external-link-alt"></i> Launch Live Portal
+                </a>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // 1. Initialize Reveal.js
+        Reveal.initialize({
+            hash: true,
+            transition: 'slide',
+            controls: true,
+            progress: true,
+            center: true,
+            width: 1280,
+            height: 720,
+            margin: 0.1
+        });
+
+        // 2. Initialize Mermaid
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'dark',
+            securityLevel: 'loose',
+            fontFamily: 'Inter',
+            themeVariables: {
+                primaryColor: '#0f172a',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#38bdf8',
+                lineColor: '#cbd5e1',
+                secondaryColor: '#1e293b',
+                tertiaryColor: '#064e3b'
+            }
+        });
+
+        // 3. Chart Storage to prevent "Canvas already in use" errors
+        const chartInstances = {};
+
+        function renderCampusChart() {
+            const ctx = document.getElementById('campusDistributionChart');
+            if(!ctx) return;
+            if(chartInstances['campus']) chartInstances['campus'].destroy();
+            
+            chartInstances['campus'] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Vellore Main', 'Chennai Tech', 'Bhopal Eng', 'Delhi Bus.', 'Amaravati'],
+                    datasets: [{
+                        label: 'Active Student Count',
+                        data: [15000, 12000, 9500, 8000, 5520],
+                        backgroundColor: 'rgba(56, 189, 248, 0.7)',
+                        borderColor: '#38bdf8',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleFont: { family: 'Inter' }, bodyFont: { family: 'Inter' } }
+                    },
+                    scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { family: 'Inter' } } },
+                        x: { grid: { display: false }, ticks: { color: '#e2e8f0', font: { family: 'Inter', weight: 'bold' } } }
+                    }
+                }
+            });
+        }
+
+        function renderAssetChart() {
+            const ctx = document.getElementById('assetChart');
+            if(!ctx) return;
+            if(chartInstances['asset']) chartInstances['asset'].destroy();
+
+            chartInstances['asset'] = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['New/Excellent', 'Good', 'Fair', 'Needs Replace'],
+                    datasets: [{
+                        data: [45, 30, 15, 10],
+                        backgroundColor: ['#10b981', '#38bdf8', '#f59e0b', '#ef4444'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'right', labels: { color: '#e2e8f0', font: { family: 'Inter' } } } 
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        function renderRevenueChart() {
+            const ctx = document.getElementById('revenueChart');
+            if(!ctx) return;
+            if(chartInstances['revenue']) chartInstances['revenue'].destroy();
+
+            chartInstances['revenue'] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                    datasets: [{
+                        label: 'Gross Fee Collection',
+                        data: [120, 145, 132, 160],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } },
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#e2e8f0' } }
+                    }
+                }
+            });
+        }
+
+        function renderPlacementChart() {
+            const ctx = document.getElementById('placementChart');
+            if(!ctx) return;
+            if(chartInstances['placement']) chartInstances['placement'].destroy();
+
+            chartInstances['placement'] = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Google', 'Microsoft', 'Amazon', 'TCS', 'Meta'],
+                    datasets: [{
+                        label: 'Highest CTC (LPA)',
+                        data: [48.5, 45.0, 42.0, 12.0, 52.0],
+                        backgroundColor: 'rgba(245, 158, 11, 0.25)',
+                        borderColor: '#f59e0b',
+                        pointBackgroundColor: '#f59e0b',
+                        borderWidth: 2,
+                        pointRadius: 4
+                    }, {
+                        label: 'Average CTC (LPA)',
+                        data: [35.0, 32.0, 30.0, 8.5, 40.0],
+                        backgroundColor: 'rgba(56, 189, 248, 0.2)',
+                        borderColor: '#38bdf8',
+                        pointBackgroundColor: '#38bdf8',
+                        borderWidth: 2,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'top', labels: { color: '#e2e8f0', font: { family: 'Inter' } } } 
+                    },
+                    scales: {
+                        r: {
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            pointLabels: { color: '#e2e8f0', font: { family: 'Inter', size: 14 } },
+                            ticks: { display: false },
+                            angleLines: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 4. Initialize charts when slides change to ensure proper rendering
+        Reveal.on('slidechanged', event => {
+            const currentSlide = event.indexh; // Horizontal slide index
+            
+            // Slide 3: Campus Distribution (Index 3)
+            if (currentSlide === 3) setTimeout(renderCampusChart, 100);
+            
+            // Slide 7: Finance & Assets (Index 7)
+            if (currentSlide === 7) {
+                setTimeout(renderAssetChart, 100);
+                setTimeout(renderRevenueChart, 100);
+            }
+            
+            // Slide 8: Placements (Index 8)
+            if (currentSlide === 8) setTimeout(renderPlacementChart, 100);
+        });
+
+        // Fallback for initial load if starting on a specific slide
+        setTimeout(() => {
+            const currentSlide = Reveal.getIndices().h;
+            if (currentSlide === 3) renderCampusChart();
+            if (currentSlide === 7) { renderAssetChart(); renderRevenueChart(); }
+            if (currentSlide === 8) renderPlacementChart();
+        }, 500);
+
+    </script>
+</body>
+</html>

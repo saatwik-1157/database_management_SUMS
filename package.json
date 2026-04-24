@@ -1,0 +1,16 @@
+{
+  "name": "sums-backend",
+  "version": "1.0.0",
+  "description": "Express backend for Smart University Management System",
+  "main": "node_server.js",
+  "scripts": {
+    "start": "node node_server.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "mysql2": "^3.11.0",
+    "dotenv": "^16.4.5"
+  }
+}

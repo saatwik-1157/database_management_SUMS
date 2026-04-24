@@ -72,26 +72,26 @@ INSERT IGNORE INTO Students (FirstName, LastName, Email, DOB, DeptID) VALUES
 
 -- 6. Enrollments (Some sample grades)
 INSERT IGNORE INTO Enrollments (StudentID, SectionID, Grade, EnrollmentStatus) VALUES
-(1, 1, 3.80, 'Completed'),
-(1, 3, 4.00, 'Completed'),
-(2, 1, 3.20, 'Completed'),
-(2, 10, 3.90, 'Enrolled'),
-(3, 4, 3.50, 'Completed'),
-(4, 4, 3.10, 'Completed'),
-(5, 6, 2.90, 'Enrolled'),
-(6, 6, 4.00, 'Completed'),
-(7, 8, 3.70, 'Completed'),
-(8, 8, 3.40, 'Enrolled'),
-(9, 2, 3.95, 'Completed'),
-(10, 5, 2.50, 'Dropped'),
-(11, 7, 3.60, 'Completed'),
-(12, 9, 3.85, 'Enrolled'),
-(13, 1, 3.30, 'Completed'),
-(14, 4, 3.00, 'Completed'),
-(15, 6, 3.20, 'Completed'),
-(16, 8, 3.90, 'Enrolled'),
-(17, 10, 4.00, 'Enrolled'),
-(18, 5, 3.50, 'Enrolled');
+(1, 1, 9.50, 'Completed'),
+(1, 3, 10.00, 'Completed'),
+(2, 1, 8.00, 'Completed'),
+(2, 10, 9.75, 'Enrolled'),
+(3, 4, 8.75, 'Completed'),
+(4, 4, 7.75, 'Completed'),
+(5, 6, 7.25, 'Enrolled'),
+(6, 6, 10.00, 'Completed'),
+(7, 8, 9.25, 'Completed'),
+(8, 8, 8.50, 'Enrolled'),
+(9, 2, 9.88, 'Completed'),
+(10, 5, 6.25, 'Dropped'),
+(11, 7, 9.00, 'Completed'),
+(12, 9, 9.63, 'Enrolled'),
+(13, 1, 8.25, 'Completed'),
+(14, 4, 7.50, 'Completed'),
+(15, 6, 8.00, 'Completed'),
+(16, 8, 9.75, 'Enrolled'),
+(17, 10, 10.00, 'Enrolled'),
+(18, 5, 8.75, 'Enrolled');
 
 -- 7. Payments
 INSERT IGNORE INTO Payments (StudentID, Amount, PaymentMethod, Status) VALUES

@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VITAP Enterprise Master Hub | Unified University Suite</title>
+    <title>VIT Global Hub | Smart University Management</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body id="master-body">
 
-    <!-- Unified Master Sidebar -->
+    <!-- Premium Glass Sidebar -->
     <nav class="sidebar">
         <div class="logo-container">
-            <div class="logo">VITAP Enterprise</div>
-            <div id="active-role-tag" style="font-size: 0.7rem; color: var(--acc-primary); margin-top: 0.5rem; font-weight: 800;">ADMIN COMMAND CENTER</div>
+            <div class="logo">VIT Global Hub</div>
+            <div id="active-role-tag" style="font-size: 0.75rem; color: var(--acc-primary); margin-top: 0.6rem; font-weight: 900; letter-spacing: 1px;">SYSTEM CORE</div>
         </div>
         
         <ul id="master-nav" class="nav-links">
@@ -25,56 +25,116 @@
         </ul>
 
         <div style="margin-top: auto;">
-            <div style="margin-bottom: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 1.5rem;">
-                <p style="font-size: 0.65rem; color: rgba(255, 255, 255, 0.4); margin-bottom: 0.75rem; text-transform: uppercase; font-weight: 700;">Switch Persona</p>
-                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                    <button class="btn btn-switch" onclick="switchPortal('admin')"><i class="fas fa-shield-alt"></i> Admin Hub</button>
-                    <button class="btn btn-switch" onclick="switchPortal('student')"><i class="fas fa-user-graduate"></i> Student Portal</button>
-                    <button class="btn btn-switch" onclick="switchPortal('faculty')"><i class="fas fa-user-tie"></i> Faculty Suite</button>
+            <div style="margin-bottom: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                <p style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 1rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Portal Selection</p>
+                <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+                    <button class="btn btn-switch" onclick="switchPortal('admin')"><i class="fas fa-shield-alt"></i> <span>Admin Hub</span></button>
+                    <button class="btn btn-switch" onclick="switchPortal('student')"><i class="fas fa-user-graduate"></i> <span>Student Portal</span></button>
+                    <button class="btn btn-switch" onclick="switchPortal('faculty')"><i class="fas fa-user-tie"></i> <span>Faculty Suite</span></button>
                 </div>
             </div>
-            <button class="btn" style="width: 100%; background: var(--bg-navy); border: 1px solid var(--acc-primary);" onclick="togglePresentation(true)"><i class="fas fa-play"></i> Present Slides</button>
+            <button class="btn" style="width: 100%;" onclick="togglePresentation(true)"><i class="fas fa-play"></i> <span>Showroom Mode</span></button>
         </div>
     </nav>
 
-    <!-- Main Dynamic Content -->
+    <!-- Unified Dashboard Layer -->
     <main id="main-portal" class="main-content">
-        <header>
+        <header class="animate-fade">
             <div class="header-title">
-                <h1 id="portal-title">University Overview</h1>
-                <p id="portal-desc" style="color: var(--text-muted); font-size: 0.8rem;">Real-time management for VITAP's 1,100+ members.</p>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div id="status-glow" class="status-indicator"></div>
+                    <div>
+                        <h1 id="portal-title">University Overview</h1>
+                        <p id="portal-desc" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">Enterprise-scale management for VIT Global academics.</p>
+                    </div>
+                </div>
             </div>
-            <div id="header-search-container" class="header-right">
-                <input type="text" id="global-search" style="padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid var(--border-light);" placeholder="🔍 Search University..." onkeyup="handleSearch()">
+            <div class="header-right">
+                <div class="campus-selector">
+                    <select id="campus-filter" onchange="handleCampusFilter()">
+                        <option value="all">Global Network</option>
+                        <option value="1">Vellore Main</option>
+                        <option value="2">Chennai Tech</option>
+                        <option value="3">Bhopal Engineering</option>
+                        <option value="4">Delhi Business</option>
+                        <option value="5">Amaravati Central</option>
+                    </select>
+                </div>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="global-search" placeholder="Search Master Registry..." onkeyup="handleSearch()">
+                </div>
+                <div class="notification-trigger" onclick="toggleNotificationTray()">
+                    <i class="fas fa-bell"></i>
+                    <span class="count-badge">4</span>
+                </div>
             </div>
         </header>
 
-        <!-- View Container -->
-        <div id="view-container">
-            <!-- Dynamic Sub-sections like Stats, Charts, Tables as seen in previous versions -->
+        <!-- Sidebar Notification Tray -->
+        <div id="notification-tray" class="notification-panel">
+            <div class="panel-header">
+                <h3>Global Alerts</h3>
+                <span class="close-panel" onclick="toggleNotificationTray()"><i class="fas fa-times"></i></span>
+            </div>
+            <div id="notification-list" class="panel-content">
+                <!-- Notifications injected by app.js -->
+            </div>
         </div>
+
+        <!-- Dynamic View Port -->
+        <div id="view-container" class="view-wrapper">
+            <!-- Content injected by app.js -->
+        </div>
+
+        <!-- Live System Ticker -->
+        <footer class="system-ticker">
+            <div class="ticker-label">LIVE SYSTEM FEED</div>
+            <div id="ticker-content" class="ticker-track">
+                <span>[SYNC] Cross-Campus Ledger Updated ...</span>
+                <span>[AUDIT] User 247131 accessed Financial Vault ...</span>
+                <span>[ASSET] New MacBook Pro M3 registered at Bangalore ...</span>
+            </div>
+        </footer>
 
     </main>
 
-    <!-- Presentation Overlay Tier -->
-    <div id="presentation-layer" class="presentation-overlay animate-fade">
-        <div class="presentation-header">
-            <button class="btn btn-close-pres" onclick="togglePresentation(false)"><i class="fas fa-times"></i> Exit Presentation</button>
-        </div>
-        <div id="presentation-slides" class="slides-container">
-            <!-- Slides Injected Here -->
-        </div>
-        <div class="pres-controls">
-            <button class="btn-ctrl" onclick="prevSlide()"><i class="fas fa-chevron-left"></i></button>
-            <button class="btn-ctrl" onclick="nextSlide()"><i class="fas fa-chevron-right"></i></button>
+    <!-- Superuser Command Console -->
+    <div id="command-console" class="console-overlay">
+        <div class="console-box">
+            <div class="console-header">
+                <span><i class="fas fa-terminal"></i> SUMS_ROOT@VIT_GLOBAL:~</span>
+                <span onclick="toggleConsole()"><i class="fas fa-times"></i></span>
+            </div>
+            <div id="console-output" class="console-log">
+                <p>> System ready. Awaiting instructions.</p>
+            </div>
+            <div class="console-input-line">
+                <span>#</span>
+                <input type="text" id="console-input" placeholder="Enter command..." onkeydown="handleConsole(event)">
+            </div>
         </div>
     </div>
 
-    <!-- Administrative Audit Modal -->
-    <div id="audit-modal" class="modal-overlay" onclick="closeAudit()">
-        <div class="modal-content animate-slide-up" onclick="event.stopPropagation()">
+    <!-- Presentation Mode Overlay -->
+    <div id="presentation-layer" class="presentation-overlay">
+        <div class="presentation-controls-top" style="position: absolute; top: 2rem; right: 2rem;">
+            <button class="btn" style="background: var(--acc-danger);" onclick="togglePresentation(false)"><i class="fas fa-times"></i> Exit</button>
+        </div>
+        <div id="presentation-slides" class="slides-container animate-fade">
+            <!-- Slides injected by app.js -->
+        </div>
+        <div class="pres-navigation" style="position: absolute; bottom: 3rem; display: flex; gap: 2rem;">
+            <button class="btn btn-ctrl" onclick="prevSlide()"><i class="fas fa-arrow-left"></i></button>
+            <button class="btn btn-ctrl" onclick="nextSlide()"><i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <!-- Interactive Audit Modal -->
+    <div id="audit-modal" class="modal-overlay" onclick="closeAudit()" style="position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(8px);">
+        <div class="p-card animate-fade" onclick="event.stopPropagation()" style="max-width: 600px; width: 90%; border-color: var(--acc-primary);">
             <div id="audit-content"></div>
-            <button class="btn btn-close" onclick="closeAudit()" style="width: 100%; margin-top: 2rem;">Close Audit View</button>
+            <button class="btn" onclick="closeAudit()" style="width: 100%; margin-top: 2rem; background: var(--bg-sidebar); border: 1px solid var(--border);">Back to Hub</button>
         </div>
     </div>
 

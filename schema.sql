@@ -5,12 +5,48 @@ DROP DATABASE IF EXISTS SmartUniversityDB;
 CREATE DATABASE SmartUniversityDB;
 USE SmartUniversityDB;
 
+-- 0. RBAC System
+CREATE TABLE Roles (
+    RoleID INT AUTO_INCREMENT PRIMARY KEY,
+    RoleName VARCHAR(50) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+CREATE TABLE UserAccounts (
+    UserID INT AUTO_INCREMENT PRIMARY KEY,
+    Username VARCHAR(50) UNIQUE NOT NULL,
+    PasswordHash VARCHAR(255) NOT NULL, -- Simulated
+    RoleID INT,
+    EntityID INT, -- Links to StudentID or FacultyID
+    LastLogin TIMESTAMP,
+    FOREIGN KEY (RoleID) REFERENCES Roles(RoleID)
+) ENGINE=InnoDB;
+
+-- 0.1 Global System Settings
+CREATE TABLE SystemSettings (
+    SettingKey VARCHAR(50) PRIMARY KEY,
+    SettingValue VARCHAR(255),
+    Description TEXT,
+    UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- 0.2 Campuses
+CREATE TABLE Campuses (
+    CampusID INT AUTO_INCREMENT PRIMARY KEY,
+    CampusName VARCHAR(100) NOT NULL,
+    City VARCHAR(100),
+    TimeZone VARCHAR(50) DEFAULT 'UTC+5:30',
+    InaugurationDate DATE,
+    Status ENUM('Operational', 'Expansion', 'Under Review') DEFAULT 'Operational'
+) ENGINE=InnoDB;
+
 -- 1. Departments Table
 CREATE TABLE Departments (
     DeptID INT AUTO_INCREMENT PRIMARY KEY,
     DeptName VARCHAR(100) NOT NULL UNIQUE,
+    CampusID INT, -- Support for multiple campuses
     Building VARCHAR(50) DEFAULT 'Main Campus',
-    Budget DECIMAL(12, 2) DEFAULT 0.00
+    Budget DECIMAL(12, 2) DEFAULT 0.00,
+    FOREIGN KEY (CampusID) REFERENCES Campuses(CampusID)
 ) ENGINE=InnoDB;
 
 -- 2. Faculty Table
@@ -66,7 +102,10 @@ CREATE TABLE Enrollments (
     EnrollmentID INT AUTO_INCREMENT PRIMARY KEY,
     StudentID INT,
     SectionID INT,
-    Grade DECIMAL(3, 2), -- 0.00 to 4.00 (GPA scale)
+    Grade DECIMAL(4, 2), -- 0.00 to 10.00 (GPA scale)
+    AssignmentWeight DECIMAL(3, 2) DEFAULT 0.20,
+    MidtermWeight DECIMAL(3, 2) DEFAULT 0.30,
+    FinalWeight DECIMAL(3, 2) DEFAULT 0.50,
     EnrollmentStatus ENUM('Enrolled', 'Withdrawn', 'Completed', 'Dropped') DEFAULT 'Enrolled',
     FOREIGN KEY (StudentID) REFERENCES Students(StudentID) ON DELETE CASCADE,
     FOREIGN KEY (SectionID) REFERENCES Sections(SectionID) ON DELETE CASCADE,

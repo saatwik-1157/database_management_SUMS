@@ -1,9 +1,16 @@
--- Smart University Management System (SUMS) - Analytics & Automation
 USE SmartUniversityDB;
 
--- 1. VIEW: Student Transcripts
+-- ==========================================
+-- 1. VIEWS (Read-only Analytics Layers)
+-- ==========================================
+
+DROP VIEW IF EXISTS StudentTranscripts;
+DROP VIEW IF EXISTS FacultyWorkload;
+DROP VIEW IF EXISTS OverdueBooks;
+DROP VIEW IF EXISTS HostelAvailability;
+
 -- Displays a clean view of all completed courses for each student
-CREATE OR REPLACE VIEW StudentTranscripts AS
+CREATE VIEW StudentTranscripts AS
 SELECT 
     s.StudentID,
     CONCAT(s.FirstName, ' ', s.LastName) AS StudentName,
@@ -18,9 +25,8 @@ JOIN Sections sec ON e.SectionID = sec.SectionID
 JOIN Courses c ON sec.CourseID = c.CourseID
 WHERE e.EnrollmentStatus = 'Completed';
 
--- 2. VIEW: Faculty Workload
 -- Shows how many sections each faculty member is teaching
-CREATE OR REPLACE VIEW FacultyWorkload AS
+CREATE VIEW FacultyWorkload AS
 SELECT 
     f.FacultyID,
     CONCAT(f.FirstName, ' ', f.LastName) AS FacultyName,
@@ -31,71 +37,8 @@ LEFT JOIN Sections s ON f.FacultyID = s.FacultyID
 JOIN Departments d ON f.DeptID = d.DeptID
 GROUP BY f.FacultyID, d.DeptName;
 
--- 3. STORED PROCEDURE: Calculate Student GPA
--- Calculates the average grade for a specific student
-DELIMITER //
-
-CREATE PROCEDURE GetStudentGPA(IN stud_id INT, OUT gpa DECIMAL(3,2))
-BEGIN
-    SELECT AVG(Grade) INTO gpa
-    FROM Enrollments
-    WHERE StudentID = stud_id AND EnrollmentStatus = 'Completed';
-    
-    -- If no grades found, set to 0.00
-    IF gpa IS NULL THEN
-        SET gpa = 0.00;
-    END IF;
-END //
-
-DELIMITER ;
-
--- 4. TRIGGER: Prevent Over-Enrollment
--- Prevents a student from enrolling in a section that is already at full capacity
-DELIMITER //
-
-CREATE TRIGGER BeforeEnrollmentInsert
-BEFORE INSERT ON Enrollments
-FOR EACH ROW
-BEGIN
-    DECLARE current_count INT;
-    DECLARE max_cap INT;
-    
-    -- Get current enrollment count for the section
-    SELECT COUNT(*) INTO current_count 
-    FROM Enrollments 
-    WHERE SectionID = NEW.SectionID AND EnrollmentStatus = 'Enrolled';
-    
-    -- Get capacity for the section
-    SELECT Capacity INTO max_cap 
-    FROM Sections 
-    WHERE SectionID = NEW.SectionID;
-    
-    IF current_count >= max_cap THEN
-        SIGNAL SQLSTATE '45000' 
-        SET MESSAGE_TEXT = 'Error: This section is already at maximum capacity.';
-    END IF;
-END //
-
-DELIMITER ;
-
--- 5. TRIGGER: Automated Payment Status
--- Automatically marks a student as 'Paid' if they have a scholarship (simulated logic)
-DELIMITER //
-
-CREATE TRIGGER BeforePaymentInsert
-BEFORE INSERT ON Payments
-FOR EACH ROW
-BEGIN
-    IF NEW.PaymentMethod = 'Scholarship' THEN
-        SET NEW.Status = 'Paid';
-    END IF;
-END //
-
-DELIMITER ;
-
--- 6. VIEW: Overdue Books
--- Lists all students who haven't returned books past the due date
-CREATE OR REPLACE VIEW OverdueBooks AS
+-- Lists overdue books (Depends on addons.sql)
+CREATE VIEW OverdueBooks AS
 SELECT 
     l.LoanID,
     s.StudentID,
@@ -108,9 +51,8 @@ JOIN Students s ON l.StudentID = s.StudentID
 JOIN Books b ON l.BookID = b.BookID
 WHERE l.ReturnDate IS NULL AND l.DueDate < CURRENT_DATE;
 
--- 7. VIEW: Hostel Availability
--- Shows occupancy stats for all hostels
-CREATE OR REPLACE VIEW HostelAvailability AS
+-- Shows occupancy stats (Depends on addons.sql)
+CREATE VIEW HostelAvailability AS
 SELECT 
     HostelName,
     GenderRestriction,
@@ -119,126 +61,221 @@ SELECT
     (Capacity - CurrentOccupancy) AS RoomsAvailable
 FROM Hostels;
 
--- 8. TRIGGER: Manage Book Inventory (Issue)
+-- ==========================================
+-- 2. STORED PROCEDURES (Operational Logic)
+-- ==========================================
+
+DROP PROCEDURE IF EXISTS GetStudentGPA;
+DROP PROCEDURE IF EXISTS CheckGraduationEligibility;
+
 DELIMITER //
 
+-- Calculates average grade on a 10.0 scale
+CREATE PROCEDURE GetStudentGPA(IN stud_id INT, OUT gpa DECIMAL(4,2))
+BEGIN
+    SELECT AVG(Grade) INTO gpa
+    FROM Enrollments
+    WHERE StudentID = stud_id AND EnrollmentStatus = 'Completed';
+    
+    IF gpa IS NULL THEN SET gpa = 0.00; END IF;
+END //
+
+-- Checks graduation (Threshold: 10 credits and 6.5/10.0 GPA)
+CREATE PROCEDURE CheckGraduationEligibility(IN stud_id INT, OUT is_eligible BOOLEAN, OUT msg TEXT)
+BEGIN
+    DECLARE total_credits INT DEFAULT 0;
+    DECLARE current_gpa DECIMAL(4,2) DEFAULT 0.00;
+    DECLARE pending_dues INT DEFAULT 0;
+    
+    -- Sum credits for unique courses completed
+    SELECT SUM(Credits) INTO total_credits
+    FROM (
+        SELECT DISTINCT c.CourseID, c.Credits
+        FROM Enrollments e
+        JOIN Sections s ON e.SectionID = s.SectionID
+        JOIN Courses c ON s.CourseID = c.CourseID
+        WHERE e.StudentID = stud_id AND e.EnrollmentStatus = 'Completed'
+    ) AS UniqueCredits;
+    
+    CALL GetStudentGPA(stud_id, current_gpa);
+    
+    SELECT COUNT(*) INTO pending_dues FROM Payments WHERE StudentID = stud_id AND Status = 'Pending';
+    
+    -- Adjusted for 10.0 Scale: Req 6.5 GPA
+    IF total_credits >= 10 AND current_gpa >= 6.5 THEN
+        IF pending_dues = 0 THEN
+            SET is_eligible = TRUE;
+            SET msg = 'Eligible for graduation.';
+        ELSE
+            SET is_eligible = FALSE;
+            SET msg = 'Ineligible: Pending financial dues.';
+        END IF;
+    ELSE
+        SET is_eligible = FALSE;
+        SET msg = CONCAT('Ineligible: Low Credits (', total_credits, ') or GPA (', current_gpa, ').');
+    END IF;
+END //
+
+DELIMITER ;
+
+-- ==========================================
+-- 3. TRIGGERS (Automated Business Rules)
+-- ==========================================
+
+DROP TRIGGER IF EXISTS BeforeEnrollmentInsert;
+DROP TRIGGER IF EXISTS BeforePaymentInsert;
+DROP TRIGGER IF EXISTS BeforeBookLoan;
+DROP TRIGGER IF EXISTS AfterBookLoan;
+DROP TRIGGER IF EXISTS BeforeBookReturn;
+DROP TRIGGER IF EXISTS AfterBookReturn;
+DROP TRIGGER IF EXISTS AfterMaintenanceInsert;
+
+DELIMITER //
+
+-- Capacity Control
+CREATE TRIGGER BeforeEnrollmentInsert
+BEFORE INSERT ON Enrollments
+FOR EACH ROW
+BEGIN
+    DECLARE current_count INT;
+    DECLARE max_cap INT;
+    SELECT COUNT(*) INTO current_count FROM Enrollments WHERE SectionID = NEW.SectionID AND EnrollmentStatus IN ('Enrolled', 'Completed');
+    SELECT Capacity INTO max_cap FROM Sections WHERE SectionID = NEW.SectionID;
+    IF current_count >= max_cap THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: Section Capacity Reached.';
+    END IF;
+END //
+
+-- Auto-Pay for Scholarships
+CREATE TRIGGER BeforePaymentInsert
+BEFORE INSERT ON Payments
+FOR EACH ROW
+BEGIN
+    IF NEW.PaymentMethod = 'Scholarship' THEN SET NEW.Status = 'Paid'; END IF;
+END //
+
+-- Library Availability Check (Error 1644)
 CREATE TRIGGER BeforeBookLoan
 BEFORE INSERT ON LibraryLoans
 FOR EACH ROW
 BEGIN
     DECLARE available INT;
-    
-    SELECT AvailableCopies INTO available 
-    FROM Books 
-    WHERE BookID = NEW.BookID;
-    
-    IF available <= 0 THEN
-        SIGNAL SQLSTATE '45000' 
-        SET MESSAGE_TEXT = 'Error: No copies of this book are currently available.';
-    ELSE
-        UPDATE Books 
-        SET AvailableCopies = AvailableCopies - 1 
-        WHERE BookID = NEW.BookID;
+    SELECT AvailableCopies INTO available FROM Books WHERE BookID = NEW.BookID;
+    IF available IS NULL OR available <= 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error: No copies of this book are currently available.';
     END IF;
 END //
 
-DELIMITER ;
+-- Library Inventory Management
+CREATE TRIGGER AfterBookLoan
+AFTER INSERT ON LibraryLoans
+FOR EACH ROW
+BEGIN
+    UPDATE Books SET AvailableCopies = AvailableCopies - 1 WHERE BookID = NEW.BookID;
+END //
 
--- 9. TRIGGER: Manage Book Inventory (Return)
-DELIMITER //
-
+-- Library Fine Calculation (BEFORE UPDATE to modify NEW)
 CREATE TRIGGER BeforeBookReturn
 BEFORE UPDATE ON LibraryLoans
 FOR EACH ROW
 BEGIN
-    -- If the book was just returned (ReturnDate changed from NULL to a date)
     IF OLD.ReturnDate IS NULL AND NEW.ReturnDate IS NOT NULL THEN
-        UPDATE Books 
-        SET AvailableCopies = AvailableCopies + 1 
-        WHERE BookID = NEW.BookID;
-        
-        -- Logic for Fine Calculation (e.g., $1 per day late)
         IF NEW.ReturnDate > NEW.DueDate THEN
-            SET NEW.FineAmount = DATEDIFF(NEW.ReturnDate, NEW.DueDate) * 1.00;
+            SET NEW.FineAmount = DATEDIFF(NEW.ReturnDate, NEW.DueDate) * 5.00; -- ₹5 per day
         END IF;
     END IF;
 END //
 
-DELIMITER ;
-
--- 10. TRIGGER: Update Hostel Occupancy
-DELIMITER //
-
-CREATE TRIGGER AfterRoomAllocation
-AFTER INSERT ON RoomAllocations
+-- Update Books on Return
+CREATE TRIGGER AfterBookReturn
+AFTER UPDATE ON LibraryLoans
 FOR EACH ROW
 BEGIN
-    UPDATE Hostels 
-    SET CurrentOccupancy = CurrentOccupancy + 1 
-    WHERE HostelID = NEW.HostelID;
-END //
-
-DELIMITER ;
-
--- 11. STORED PROCEDURE: Check Graduation Eligibility
--- Checks if a student is ready to graduate based on Credits, GPA, and Dues
-DELIMITER //
-
-CREATE PROCEDURE CheckGraduationEligibility(IN stud_id INT, OUT is_eligible BOOLEAN, OUT msg TEXT)
-BEGIN
-    DECLARE total_credits INT DEFAULT 0;
-    DECLARE current_gpa DECIMAL(3,2) DEFAULT 0.00;
-    DECLARE pending_dues INT DEFAULT 0;
-    
-    -- Calculate total credits from completed courses
-    SELECT SUM(c.Credits) INTO total_credits
-    FROM Enrollments e
-    JOIN Sections s ON e.SectionID = s.SectionID
-    JOIN Courses c ON s.CourseID = c.CourseID
-    WHERE e.StudentID = stud_id AND e.EnrollmentStatus = 'Completed';
-    
-    -- Calculate GPA
-    CALL GetStudentGPA(stud_id, current_gpa);
-    
-    -- Check for pending payments
-    SELECT COUNT(*) INTO pending_dues
-    FROM Payments
-    WHERE StudentID = stud_id AND Status = 'Pending';
-    
-    -- Graduation Logic (Example: 10+ credits and 2.5+ GPA and 0 dues)
-    IF total_credits >= 10 AND current_gpa >= 2.5 THEN
-        IF pending_dues = 0 THEN
-            SET is_eligible = TRUE;
-            SET msg = 'Congratulations! Student is eligible for graduation.';
-        ELSE
-            SET is_eligible = FALSE;
-            SET msg = 'Ineligible: Student has pending financial dues.';
-        END IF;
-    ELSE
-        SET is_eligible = FALSE;
-        SET msg = CONCAT('Ineligible: Req. 10 credits (Has ', total_credits, ') and 2.5 GPA (Has ', current_gpa, ').');
+    IF OLD.ReturnDate IS NULL AND NEW.ReturnDate IS NOT NULL THEN
+        UPDATE Books SET AvailableCopies = AvailableCopies + 1 WHERE BookID = NEW.BookID;
     END IF;
 END //
 
-DELIMITER ;
-
--- 12. TRIGGER: Urgent Maintenance Notification
--- Sends a system alert when an 'Urgent' repair is reported
-DELIMITER //
-
+-- Urgent System Alerts
 CREATE TRIGGER AfterMaintenanceInsert
 AFTER INSERT ON MaintenanceLogs
 FOR EACH ROW
 BEGIN
     IF NEW.Priority = 'Urgent' THEN
         INSERT INTO SystemNotifications (FacultyID, Message)
-        SELECT FacultyID, CONCAT('URGENT: Maintenance required at ', NEW.Location, '. Issue: ', NEW.Description)
-        FROM Faculty
-        WHERE FacultyRank = 'Professor' AND DeptID = 1 -- Notify HOD/Professors in charge
-        LIMIT 1;
+        SELECT FacultyID, CONCAT('URGENT: Maintenance at ', NEW.Location)
+        FROM Faculty WHERE FacultyRank = 'Professor' LIMIT 1;
     END IF;
 END //
 
 DELIMITER ;
+
+-- ==========================================
+-- 4. COMPLEX ANALYTICS (Management Tier)
+-- ==========================================
+
+-- Predicts students at risk of failure based on participation and attendance
+CREATE OR REPLACE VIEW AtRiskStudents AS
+SELECT 
+    s.StudentID,
+    CONCAT(s.FirstName, ' ', s.LastName) AS StudentName,
+    d.DeptName,
+    AVG(e.Grade) as CurrentGPA,
+    (SELECT AVG(Status = 'Present') FROM Attendance a WHERE a.StudentID = s.StudentID) * 100 AS AttendancePercentage,
+    CASE 
+        WHEN (SELECT AVG(Status = 'Present') FROM Attendance a WHERE a.StudentID = s.StudentID) < 0.75 THEN 'High Risk (Attendance)'
+        WHEN AVG(e.Grade) < 5.0 THEN 'High Risk (Academic)'
+        ELSE 'On Track'
+    END AS RiskLevel
+FROM Students s
+JOIN Enrollments e ON s.StudentID = e.StudentID
+JOIN Departments d ON s.DeptID = d.DeptID
+GROUP BY s.StudentID, d.DeptName;
+
+-- Financial Heatmap: Dept Budget vs Revenue Generated
+CREATE OR REPLACE VIEW DeptFinancialPerformance AS
+SELECT 
+    d.DeptName,
+    d.Budget,
+    SUM(p.Amount) AS TotalRevenueCollected,
+    (SUM(p.Amount) - d.Budget) AS NetProfitMargin,
+    CASE 
+        WHEN (SUM(p.Amount) - d.Budget) > 0 THEN 'Self-Sufficient'
+        ELSE 'Subsidized'
+    END AS FinancialStatus
+FROM Departments d
+LEFT JOIN Students s ON d.DeptID = s.DeptID
+LEFT JOIN Payments p ON s.StudentID = p.StudentID AND p.Status = 'Paid'
+GROUP BY d.DeptID, d.DeptName, d.Budget;
+
+-- ==========================================
+-- 5. ULTRA-ENTERPRISE ANALYTICS (Global Tier)
+-- ==========================================
+
+-- Cross-Campus Yield: Comparing student performance across locations
+CREATE OR REPLACE VIEW GlobalCampusYield AS
+SELECT 
+    c.CampusName,
+    COUNT(s.StudentID) AS TotalStudents,
+    AVG(e.Grade) AS AverageCampusGPA,
+    SUM(p.Amount) AS TotalCampusRevenue
+FROM Campuses c
+LEFT JOIN Departments d ON c.CampusID = d.CampusID
+LEFT JOIN Students s ON d.DeptID = s.DeptID
+LEFT JOIN Enrollments e ON s.StudentID = e.StudentID
+LEFT JOIN Payments p ON s.StudentID = p.StudentID AND p.Status = 'Paid'
+GROUP BY c.CampusID, c.CampusName;
+
+-- Asset Health Summary: tracking IT and Lab hardware across campuses
+CREATE OR REPLACE VIEW AssetHealthSummary AS
+SELECT 
+    c.CampusName,
+    a.AssetType,
+    COUNT(*) AS TotalAssets,
+    SUM(a.EstimatedValue) AS InventoryValue,
+    SUM(CASE WHEN a.ConditionLevel IN ('Needs Replacement', 'Fair') THEN 1 ELSE 0 END) AS MaintenanceRequired
+FROM Campuses c
+JOIN Assets a ON c.CampusID = a.CampusID
+GROUP BY c.CampusName, a.AssetType;
 
 

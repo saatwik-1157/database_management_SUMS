@@ -1,7 +1,9 @@
--- Smart University Management System (SUMS) - Advanced Features (Placements & Infrastructure)
 USE SmartUniversityDB;
 
 -- 1. Career & Placement Module
+DROP TABLE IF EXISTS PlacementResults;
+DROP TABLE IF EXISTS PlacementDrives;
+DROP TABLE IF EXISTS Companies;
 CREATE TABLE Companies (
     CompanyID INT AUTO_INCREMENT PRIMARY KEY,
     CompanyName VARCHAR(100) NOT NULL UNIQUE,
@@ -35,6 +37,7 @@ CREATE TABLE PlacementResults (
 ) ENGINE=InnoDB;
 
 -- 2. Infrastructure Maintenance Module
+DROP TABLE IF EXISTS MaintenanceLogs;
 CREATE TABLE MaintenanceLogs (
     RequestID INT AUTO_INCREMENT PRIMARY KEY,
     Location VARCHAR(100) NOT NULL, -- e.g. "Turing Hall Room 101"
@@ -46,6 +49,7 @@ CREATE TABLE MaintenanceLogs (
 ) ENGINE=InnoDB;
 
 -- 3. Notification Log Table
+DROP TABLE IF EXISTS SystemNotifications;
 CREATE TABLE SystemNotifications (
     NotificationID INT AUTO_INCREMENT PRIMARY KEY,
     StudentID INT,

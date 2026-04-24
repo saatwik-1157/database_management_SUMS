@@ -9,13 +9,13 @@ INSERT IGNORE INTO Books (Title, Author, ISBN, Category, TotalCopies, AvailableC
 ('Engineering Mechanics', 'Hibbeler', '978-0133915426', 'ME', 4, 4),
 ('Principles of Economics', 'Mankiw', '978-1305585126', 'BA', 10, 10);
 
--- 2. Library Loans (Some Overdue)
+-- 2. Library Loans (Tracking Active, Late, and Overdue states)
 INSERT IGNORE INTO LibraryLoans (BookID, StudentID, LoanDate, DueDate, ReturnDate) VALUES
-(1, 1, '2024-03-01', '2024-03-15', '2024-03-14'),
-(2, 2, '2024-03-10', '2024-03-24', NULL), -- Active
-(3, 3, '2024-02-01', '2024-02-15', '2024-02-20'), -- Returned Late
-(4, 4, '2024-03-05', '2024-03-19', NULL), -- Overdue
-(5, 5, '2024-03-20', '2024-04-03', NULL); -- Active
+(1, 1, '2024-03-01', '2024-03-15', '2024-03-14'), -- Returned on time
+(2, 2, '2024-03-10', '2024-03-24', NULL),         -- Active loan
+(3, 3, '2024-02-01', '2024-02-15', '2024-02-20'), -- Returned late (Fines apply)
+(4, 4, '2024-03-05', '2024-03-19', NULL),         -- Overdue loan
+(5, 5, '2024-03-20', '2024-04-03', NULL);         -- Active loan
 
 -- 3. Research Papers
 INSERT IGNORE INTO ResearchPapers (Title, FacultyID, PublicationDate, JournalName, Citations, DOI) VALUES
