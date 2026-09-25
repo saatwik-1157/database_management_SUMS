@@ -4,9 +4,11 @@ import mysql.connector
 from mysql.connector import Error
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 from typing import List, Optional
 
-load_dotenv()
+# .env lives at the repository root, three levels up from apps/api/python/.
+load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 
 app = FastAPI(title="Smart University Management System API")
 
@@ -185,4 +187,4 @@ async def get_stats():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "8000")))

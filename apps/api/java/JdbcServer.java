@@ -1,4 +1,5 @@
-// File: JdbcServer.java
+// File: apps/api/java/JdbcServer.java
+// Reads .env from the working directory, so start it from the repository root.
 import com.sun.net.httpserver.*;
 import java.io.*;
 import java.net.*;

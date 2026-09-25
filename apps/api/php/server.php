@@ -1,11 +1,12 @@
 <?php
-// php_server.php
+// apps/api/php/server.php — run with: php -S localhost:8000 apps/api/php/server.php
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 require __DIR__.'/vendor/autoload.php';
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+// .env lives at the repository root, three levels up from apps/api/php/.
+$dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__, 3));
 $dotenv->safeLoad();
 
 try {

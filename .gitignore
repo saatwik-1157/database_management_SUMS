@@ -11,3 +11,8 @@ node_modules/
 *.log
 .env  
  
+# Build output
+*.class
+
+# PHP dependencies (composer install -d apps/api/php)
+vendor/

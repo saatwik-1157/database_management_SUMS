@@ -1,9 +1,11 @@
 const express = require('express');
 const mysql = require('mysql2/promise');
-require('dotenv').config({ path: '.env' });
+const path = require('path');
+// .env lives at the repository root, three levels up from apps/api/node/.
+require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '..', '.env') });
 
 const app = express();
-const PORT = 8000;
+const PORT = Number(process.env.PORT) || 8000;
 
 // Create a MySQL connection pool
 const pool = mysql.createPool({
