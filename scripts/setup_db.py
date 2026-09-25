@@ -1,8 +1,13 @@
 import os
 import subprocess
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# Resolve everything from this script's location, not the caller's CWD.
+REPO_ROOT = Path(__file__).resolve().parent.parent
+DB_DIR = REPO_ROOT / "packages" / "database"
+
+load_dotenv(REPO_ROOT / ".env")
 
 def run_sql_file_via_cli(mysql_path, filename, user, password, host, db_name=None):
     print(f"Executing {filename} via mysql CLI...")
@@ -39,24 +44,25 @@ def main():
     user = os.getenv('DB_USER', 'root')
     password = os.getenv('DB_PASSWORD', '')
     
+    # Load order matters: later files depend on tables the earlier ones create.
     SQL_FILES = [
-        'schema.sql',
-        'enterprise_core.sql',
-        'advanced_features.sql',
-        'addons.sql',
-        'transport.sql',
-        'academic_pro.sql',
-        'data.sql',
-        'data_addons.sql',
-        'data_massive_v6.sql',
-        'analytics.sql',
-        'alumni_career.sql',
-        'audit_system.sql',
-        'verify.sql'
+        'schema/schema.sql',
+        'schema/enterprise_core.sql',
+        'modules/advanced_features.sql',
+        'modules/addons.sql',
+        'modules/transport.sql',
+        'modules/academic_pro.sql',
+        'seed/data.sql',
+        'seed/data_addons.sql',
+        'seed/data_massive_v6.sql',
+        'modules/analytics.sql',
+        'modules/alumni_career.sql',
+        'modules/audit_system.sql',
+        'queries/verify.sql'
     ]
 
     for sql_file in SQL_FILES:
-        run_sql_file_via_cli(mysql_path, sql_file, user, password, host)
+        run_sql_file_via_cli(mysql_path, str(DB_DIR / sql_file), user, password, host)
 
     print("\nDatabase setup complete!")
 
