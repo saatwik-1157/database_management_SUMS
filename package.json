@@ -4,7 +4,13 @@
   "description": "Express backend for Smart University Management System",
   "main": "apps/api/node/server.js",
   "scripts": {
-    "start": "node apps/api/node/server.js"
+    "start": "node apps/api/node/server.js",
+    "api": "node apps/api/node/server.js",
+    "api:python": "python apps/api/python/server.py",
+    "web": "python -m http.server 3000 --directory apps/web",
+    "db:setup": "python scripts/setup_db.py",
+    "db:check": "python scripts/test_db.py",
+    "check": "node --check apps/api/node/server.js && node --check apps/web/app.js && python -m py_compile apps/api/python/server.py scripts/setup_db.py scripts/test_db.py scripts/generate_data.py scripts/generate_ai_ppt.py"
   },
   "author": "",
   "license": "MIT",
