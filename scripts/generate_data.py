@@ -1,5 +1,9 @@
 import random
 import datetime
+from pathlib import Path
+
+# Written next to the other seed files, regardless of the caller's CWD.
+OUTPUT_FILE = Path(__file__).resolve().parent.parent / 'packages' / 'database' / 'seed' / 'data_massive_v6.sql'
 
 # --- CONFIGURATION V6.1 ---
 NUM_STUDENTS = 50000
@@ -133,12 +137,12 @@ def generate_full_data():
     sql.append("SET FOREIGN_KEY_CHECKS = 1;")
     return "\n".join(sql)
 
-with open('data_massive_v6.sql', 'w', encoding='utf-8') as f:
+with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
     f.write(generate_full_data())
 
 print("Ultra-Enterprise V6.1 Massive Data (50k Students / 10.5k Faculty / Elite Courses) generated successfully!")
 
-with open('data_massive_v6.sql', 'w', encoding='utf-8') as f:
+with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
     f.write(generate_full_data())
 
 print("Ultra-Enterprise V6.0 Massive Data (50k Students / 10k Faculty) generated successfully!")

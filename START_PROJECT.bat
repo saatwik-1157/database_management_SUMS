@@ -1,13 +1,16 @@
 @echo off
+rem Run from the repository root no matter where this file is launched from.
+cd /d "%~dp0"
+
 echo [SUMS] Stopping any existing servers...
 powershell -Command "Stop-Process -Id (Get-NetTCPConnection -LocalPort 8000).OwningProcess -Force -ErrorAction SilentlyContinue"
 powershell -Command "Stop-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess -Force -ErrorAction SilentlyContinue"
 
 echo [SUMS] Starting Backend Server (Port 8000)...
-start /B python server.py
+start /B python apps\api\python\server.py
 
 echo [SUMS] Starting Frontend Server (Port 3000)...
-start /B python -m http.server 3000
+start /B python -m http.server 3000 --directory apps\web
 
 echo [SUMS] Waiting for servers to initialize...
 timeout /t 5 /nobreak > nul
