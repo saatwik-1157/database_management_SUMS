@@ -10,7 +10,7 @@
     "web": "python -m http.server 3000 --directory apps/web",
     "db:setup": "python scripts/setup_db.py",
     "db:check": "python scripts/test_db.py",
-    "check": "node --check apps/api/node/server.js && node --check apps/web/app.js && python -m py_compile apps/api/python/server.py scripts/setup_db.py scripts/test_db.py scripts/generate_data.py scripts/generate_ai_ppt.py"
+    "check": "node --check apps/api/node/server.js && node --check apps/web/app.js && python -m py_compile apps/api/python/server.py scripts/setup_db.py scripts/test_db.py scripts/smoke_api.py scripts/generate_data.py scripts/generate_ai_ppt.py"
   },
   "author": "",
   "license": "MIT",
