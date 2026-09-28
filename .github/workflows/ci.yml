@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  static:
+    name: Syntax checks and Java compile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: npm run check
+        run: npm run check
+
+      - name: Compile the JDBC server
+        run: javac -Xlint:all -d build/java apps/api/java/JdbcServer.java
+
+  database-and-apis:
+    name: Schema build + Node/FastAPI smoke
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: ci_root_pw   # dummy, CI-only
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pci_root_pw"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    env:
+      # 127.0.0.1, not localhost: on Linux the mysql client treats
+      # "localhost" as the Unix socket and would miss the service container.
+      DB_HOST: 127.0.0.1
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASSWORD: ci_root_pw
+      DB_NAME: SmartUniversityDB
+      MYSQL_PWD: ci_root_pw   # for the plain mysql calls below
+      NODE_PORT: "8600"
+      PY_PORT: "8601"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: apps/api/python/requirements.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          mysql --version || { sudo apt-get update && sudo apt-get install -y mysql-client; }
+          pip install -r apps/api/python/requirements.txt
+          npm ci
+
+      - name: setup_db.py fails when the SQL does not load
+        # Guards the exit code: every file fails against a closed port, so
+        # the script must exit non-zero instead of printing success.
+        run: |
+          if DB_PORT=1 python scripts/setup_db.py; then
+            echo "setup_db.py exited 0 although every SQL file failed"; exit 1
+          fi
+
+      - name: Build the schema (scripts/setup_db.py, 13 files in order)
+        run: python scripts/setup_db.py
+
+      - name: Load the optional seed (transport, alumni, placements, requests)
+        run: mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --default-character-set=utf8mb4 < packages/database/seed/sample_data_v2.sql
+
+      - name: Run queries/verify.sql
+        run: |
+          mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --default-character-set=utf8mb4 \
+            < packages/database/queries/verify.sql > verify.out
+          echo "verify.sql produced $(wc -l < verify.out) lines of output"
+
+      - name: npm run db:check
+        run: npm run db:check
+
+      - name: Start the Node and FastAPI servers
+        run: |
+          PORT=$NODE_PORT nohup node apps/api/node/server.js > node.log 2>&1 &
+          PORT=$PY_PORT nohup python apps/api/python/server.py > fastapi.log 2>&1 &
+
+      - name: Smoke-test the Node API
+        run: python scripts/smoke_api.py "http://127.0.0.1:$NODE_PORT"
+
+      - name: Smoke-test the FastAPI API
+        run: python scripts/smoke_api.py "http://127.0.0.1:$PY_PORT" /
+
+      - name: curl a route from each server
+        run: |
+          for port in "$NODE_PORT" "$PY_PORT"; do
+            curl -fsS -H "Origin: http://localhost:3000" "http://127.0.0.1:$port/stats"; echo
+          done
+
+      - name: Server logs
+        if: always()
+        run: |
+          echo "--- node.log";    cat node.log    || true
+          echo "--- fastapi.log"; cat fastapi.log || true
